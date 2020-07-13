@@ -209,6 +209,7 @@ def play(log, speed, tlast, debug_mode):
                 print(stt)
             pass
 
+
 # This makes the program asking for the file name every single time you open the program
 file_name = input("Please specify the text file you want to replay from:")
 # Alternatively you can add the line below to replace the input command
