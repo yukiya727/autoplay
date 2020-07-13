@@ -209,8 +209,11 @@ def play(log, speed, tlast, debug_mode):
                 print(stt)
             pass
 
-
-openfile("pynput_record", "history0.txt")
+# This makes the program asking for the file name every single time you open the program
+file_name = input("Please specify the text file you want to replay from:")
+# Alternatively you can add the line below to replace the input command
+# file_name = "history.txt"
+openfile("pynput_record", file_name)
 l, t = load_replay()
 print("Ready, press '.' to start")
 keyboard.wait(".")

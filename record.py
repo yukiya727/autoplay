@@ -12,7 +12,6 @@ def on_move(x, y):
         x, y, time.perf_counter()))
     if t_offset != 0.0:
         t_offset = time.perf_counter() - t_offset
-    # print(t_offset)
     with open(file_path, 'a') as f:
         if no_lag_mode:
             pass
@@ -27,7 +26,8 @@ def on_click(x, y, button, pressed):
     global file_path, t_offset, no_lag_mode, acc_lag, lag
     print('{0},{1},{2},{3},{4}'.format(
         'MousePressed' if pressed else 'MouseReleased', button, x, y, time.perf_counter()))
-    t_offset = time.perf_counter() - t_offset
+    if t_offset != 0.0:
+        t_offset = time.perf_counter() - t_offset
     with open(file_path, 'a') as f:
         if no_lag_mode:
             acc_lag += lag
@@ -46,7 +46,8 @@ def on_scroll(x, y, dx, dy):
     global file_path, t_offset, no_lag_mode, acc_lag, lag
     print('MouseScrolled,{0},{1},{2}'.format(
         x, y, time.perf_counter()))
-    t_offset = time.perf_counter() - t_offset
+    if t_offset != 0.0:
+        t_offset = time.perf_counter() - t_offset
     with open(file_path, 'a') as f:
         if no_lag_mode:
             acc_lag += lag
@@ -66,7 +67,8 @@ def on_press(key):
     try:
         print('KeyPressed,{0},{1}'.format(
             key.char, time.perf_counter()))
-        t_offset = time.perf_counter() - t_offset
+        if t_offset != 0.0:
+            t_offset = time.perf_counter() - t_offset
         with open(file_path, 'a') as f:
             if no_lag_mode:
                 acc_lag += lag
@@ -82,7 +84,8 @@ def on_press(key):
     except AttributeError:
         print('KeyPressed,{0},{1}'.format(
             key, time.perf_counter()))
-        t_offset = time.perf_counter() - t_offset
+        if t_offset != 0.0:
+            t_offset = time.perf_counter() - t_offset
         with open(file_path, 'a') as f:
             if no_lag_mode:
                 acc_lag += lag
@@ -102,7 +105,8 @@ def on_release(key):
 
     print('KeyReleased,{0},{1}'.format(
         key, time.perf_counter()))
-    t_offset = time.perf_counter() - t_offset
+    if t_offset != 0.0:
+        t_offset = time.perf_counter() - t_offset
     with open(file_path, 'a') as f:
         f.write('KeyReleased,{0},{1}'.format(
             key, (time.perf_counter() - t_offset)))
@@ -113,14 +117,15 @@ def on_release(key):
         with open(file_path, 'a') as f:
             f.write('done')
         # Stop listener
-        print(time.perf_counter() - timer)
+        if debug_mode:
+            print("Time elapesed recording:", (time.perf_counter() - timer))
         pynput.mouse.Listener.stop(m_listener)
+        print("recorder stopped")
         # And just to get rid of the last two recorded key actions
         with open(file_path, 'r') as f:
             lines = f.readlines()
         with open(file_path, 'w') as f:
             for _ in range(2):
-                print(lines[-2])
                 del lines[-2]
             for line in lines:
                 f.write(line)
@@ -133,7 +138,7 @@ def on_release(key):
 
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
-directory = 'mouse_recorder'
+directory = 'recorder_files'
 try:
     session_name = "pynput_record"
 except:
@@ -143,13 +148,24 @@ dir_path = os.path.join(os.getcwd(), directory, session_name)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 file_name = 'history'
-i = 0
-while os.path.isfile(dir_path + '/' + file_name + str(i) + '.txt'):
+i = 1
+while os.path.isfile(dir_path + '/' + file_name + '.txt'):
+    file_name += str(i)
     i += 1
-file_name += str(i) + '.txt'
-print(file_name)
+file_name += '.txt'
+
+print("The recorded actions will be saved in:", dir_path)
+print("With the file named:", file_name)
 file_path = os.path.join(dir_path, file_name)
-print(dir_path)
+
+debug_mode = False
+no_lag_mode = False
+
+mode = input("Turn on no lag mode?(y/n) ")
+if "y" in mode:
+    no_lag_mode = True
+    if "-debug" in mode:
+        debug_mode = True
 
 print("Please press 'F8' key to start recording")
 keyboard.wait("F8")
@@ -157,8 +173,6 @@ timer = time.perf_counter()
 t_offset = 0.0
 acc_lag = timer
 lag = 0.1
-
-no_lag_mode = False
 
 with pynput.keyboard.Listener(
         on_press=on_press,
