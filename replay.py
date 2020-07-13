@@ -13,7 +13,7 @@ timeBeginPeriod(1)  # new
 def openfile(dname, fname):
     global steps
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
-    directory = 'mouse_recorder'
+    directory = 'recorder_files'
     try:
         session_name = dname
     except:
@@ -69,7 +69,7 @@ def load_replay():
     startcount = False
     t_last = 0.0
     t_temp = 0.0
-    lag_limit = 240
+    lag_limit = 144
     id = 0
 
     lag_limit = 1 / lag_limit
@@ -130,8 +130,8 @@ def load_replay():
         new_steps.append(new_step)
         pause = False
         id += 1
-    for item in new_steps:
-        print(item)
+    # for item in new_steps:
+    #     print(item)
     print("Recorded objects:", len(new_steps))
     # print(new_steps[0][-1])
     return new_steps, float(new_steps[0][-1])
@@ -144,62 +144,79 @@ def play(log, speed, tlast, debug_mode):
     stt = 0.0
     if debug_mode:
         timer = time.perf_counter()
-    temp = time.perf_counter()
+    offset_timer = time.perf_counter()
     tlast -= 0.01
     for step in log:
         if step[0] == 'mousemove':
-            t_offset = time.perf_counter() - temp - st
+            t_offset = time.perf_counter() - offset_timer - st
             # print(t_offset)
             st = (float(step[-1]) - tlast - t_offset) / speed
             # print(st)
-            temp = time.perf_counter()
-            time.sleep(st)
+            offset_timer = time.perf_counter()
+            if st > 0:
+                time.sleep(st)
             stt += t_offset
             autoit.mouse_move(int(step[1]), int(step[2]), 0)
             tlast = float(step[-1])
             continue
 
         if step[0] == 'mousepressed':
-            t_offset = time.perf_counter() - t_offset
-            time.sleep((float(step[-1]) - tlast - t_offset) / speed)
+            t_offset = time.perf_counter() - offset_timer - st
+            st = (float(step[-1]) - tlast - t_offset) / speed
+            offset_timer = time.perf_counter()
+            if st < 0.0:
+                time.sleep(st)
+            stt += t_offset
             autoit.mouse_move(int(step[2]), int(step[3]), 0)
             autoit.mouse_down(step[1])
             tlast = float(step[-1])
-            t_offset = time.perf_counter()
             continue
 
         if step[0] == 'mousereleased':
-            t_offset = time.perf_counter() - t_offset
-            time.sleep((float(step[-1]) - tlast - t_offset) / speed)
+            t_offset = time.perf_counter() - offset_timer - st
+            st = (float(step[-1]) - tlast - t_offset) / speed
+            offset_timer = time.perf_counter()
+            if st < 0.0:
+                time.sleep(st)
+            stt += t_offset
             autoit.mouse_move(int(step[2]), int(step[3]), 0)
             autoit.mouse_up(step[1])
             tlast = float(step[-1])
-            t_offset = time.perf_counter()
             continue
 
         if step[0] == 'mousescrolled':
-            t_offset = time.perf_counter() - t_offset
-            time.sleep((float(step[-1]) - tlast - t_offset) / speed)
+            t_offset = time.perf_counter() - offset_timer - st
+            st = (float(step[-1]) - tlast - t_offset) / speed
+            offset_timer = time.perf_counter()
+            if st > 0:
+                time.sleep(st)
+            stt += t_offset
             autoit.mouse_wheel(int(step[2]), int(step[3]), 0)
             autoit.mouse_up(step[1])
             tlast = float(step[-1])
-            t_offset = time.perf_counter()
             continue
 
         if step[0] == 'keypressed':
-            t_offset = time.perf_counter() - t_offset
-            time.sleep((float(step[-1]) - tlast - t_offset) / speed)
+            t_offset = time.perf_counter() - offset_timer - st
+            # print(t_offset)
+            st = (float(step[-1]) - tlast - t_offset) / speed
+            offset_timer = time.perf_counter()
+            if st > 0:
+                time.sleep(st)
+            stt += t_offset
             autoit.send(step[1])
             tlast = float(step[-1])
-            t_offset = time.perf_counter()
             continue
 
         if step[0] == 'keyreleased':
-            t_offset = time.perf_counter() - t_offset
-            time.sleep((float(step[-1]) - tlast - t_offset) / speed)
+            t_offset = time.perf_counter() - offset_timer - st
+            st = (float(step[-1]) - tlast - t_offset) / speed
+            offset_timer = time.perf_counter()
+            if st > 0:
+                time.sleep(st)
+            stt += t_offset
             autoit.send(step[1])
             tlast = float(step[-1])
-            t_offset = time.perf_counter()
             continue
 
         if step[0] == 'done':
