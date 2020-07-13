@@ -1,4 +1,3 @@
-# -*- coding: cp950 -*-
 import time
 import os
 import sys
@@ -6,8 +5,8 @@ import keyboard
 import autoit
 from ctypes import windll
 
-timeBeginPeriod = windll.winmm.timeBeginPeriod  # new
-timeBeginPeriod(1)  # new
+timeBeginPeriod = windll.winmm.timeBeginPeriod
+timeBeginPeriod(1)
 
 
 def openfile(dname, fname):
@@ -24,7 +23,6 @@ def openfile(dname, fname):
     file_name = fname
     file_path = os.path.join(dir_path, file_name)
 
-    # print(dir_path)
     # open the recording file
     with open(file_path, 'r') as f:
         steps = f.readlines()
@@ -138,14 +136,14 @@ def load_replay():
 
 
 def play(log, speed, tlast, debug_mode):
-    # print("Ready, press '.' to start")
-    # keyboard.wait(".")
     st = 0.0
     stt = 0.0
+    tlast -= 0.01
+
     if debug_mode:
         timer = time.perf_counter()
     offset_timer = time.perf_counter()
-    tlast -= 0.01
+
     for step in log:
         if step[0] == 'mousemove':
             t_offset = time.perf_counter() - offset_timer - st
@@ -230,9 +228,10 @@ def play(log, speed, tlast, debug_mode):
 # This makes the program asking for the file name every single time you open the program
 file_name = input("Please specify the text file you want to replay from:")
 # Alternatively you can add the line below to replace the input command
-# file_name = "history.txt"
+# file_name = "history.txt¡§
 openfile("pynput_record", file_name)
 l, t = load_replay()
+
 print("Ready, press 'alt + .' to start")
 keyboard.wait("alt+.")
 # while True:
