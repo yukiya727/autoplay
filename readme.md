@@ -10,3 +10,6 @@ If you want to change the name of the recording file, change the `file_name` val
 _when muliple recording files are saved without changing the files' names respectively, the program will rename each file's name by adding a index number incrementally at the end of the name._ 
 
 To replay a recording you just saved, run the `replay.py` and follow the instructions
+
+The program will ask for the name of the file you want to replay from each time you run the program<br />
+If you want to specifiy the file name and stop the program from asking each single time, follow the instructions from comments at the end of the code.
