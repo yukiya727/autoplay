@@ -215,7 +215,7 @@ file_name = input("Please specify the text file you want to replay from:")
 # file_name = "history.txt"
 openfile("pynput_record", file_name)
 l, t = load_replay()
-print("Ready, press '.' to start")
-keyboard.wait(".")
+print("Ready, press 'alt + .' to start")
+keyboard.wait("alt+.")
 # while True:
 play(l, 1, t, True)
